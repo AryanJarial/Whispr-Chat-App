@@ -20,8 +20,8 @@ export const signup = async (req,res)=>{
             return res.json({success: false, message:"Account already exists"});
         }
 
-        const salt = await bycrpt.genSalt(10);
-        const hashedPassword = await bycrpt.hash(password, salt);
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
 
         const newUser = await User.create({
             fullName, email, password, hashedPassword, bio
@@ -50,7 +50,7 @@ export const login = async (req,res)=>{
             res.json({sucess: false, message:"Email Id does not exist"});
         }
 
-        const isPasswordCorrect = await bycrypt.compare(password, userData.password);
+        const isPasswordCorrect = await bcrypt.compare(password, userData.password);
 
         if(!isPasswordCorrect){
             res.json({sucess: false, message:"Invalid Credentials"});
