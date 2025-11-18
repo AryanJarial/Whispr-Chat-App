@@ -29,11 +29,11 @@ export const signup = async (req,res)=>{
 
         const token = generateToken(newUser._id);
 
-        res.json({success: true, userData: newUser, token, message:"Account created succesfully"})
+        return res.json({success: true, userData: newUser, token, message:"Account created succesfully"})
 
     } catch (error) {
         console.log(error.message);
-        res.json({success: false, message: error.message});
+        return res.json({success: false, message: error.message});
     }
 }
 
@@ -47,31 +47,31 @@ export const login = async (req,res)=>{
         const userData = await User.findOne({email});
 
         if(!userData){
-            res.json({sucess: false, message:"Email Id does not exist"});
+            return res.json({sucess: false, message:"Email Id does not exist"});
         }
 
         const isPasswordCorrect = await bcrypt.compare(password, userData.password);
 
         if(!isPasswordCorrect){
-            res.json({sucess: false, message:"Invalid Credentials"});
+            return res.json({sucess: false, message:"Invalid Credentials"});
         }
 
         const token = generateToken(userData._id);
 
-        res.json({success: true, userData, token, message:"Login Succesful"})
+        return res.json({success: true, userData, token, message:"Login Succesful"})
 
 
 
     } catch (error) {
         console.log(error.message);
-        res.json({success: false, message: error.message});
+        return res.json({success: false, message: error.message});
     }
 }
 
 
 //Controller to check if user is authenticated
 export const checkAuth = (req,res) =>{
-    res.json({success: true, user: req.user});
+    return res.json({success: true, user: req.user});
 }
 
 //Controller to update user profile details
@@ -89,10 +89,10 @@ export const updateProfile = async (req,res)=>{
             updatedUser = await User.findByIdAndUpdate(userId, {bio, fullName, profilePic: upload.secure_url},{new:true});
         }
 
-        res.json({success:true, user: updatedUser});
+        return res.json({success:true, user: updatedUser});
 
     } catch (error) {
         console.log(error.message);
-        res.json({success:false, message:error.message});
+        return res.json({success:false, message:error.message});
     }
 }

@@ -19,10 +19,10 @@ export const getUsersForSidebar = async (req,res)=>{
             }
         })
         await Promise.all(promises);
-        res.json({success:true, users:filteredUsers, unseenMessages})
+        return res.json({success:true, users:filteredUsers, unseenMessages})
     } catch (error) {
         console.log(error.message);
-        res.json({success: false, message: error.message});
+        return res.json({success: false, message: error.message});
     }
 }
 
@@ -42,10 +42,10 @@ export const getMessages = async(req,res) =>{
 
         await Message.updateMany({senderId: selectedUserId, recieverId:myId}, {seen:true});
 
-        res.json({success: true,messages});
+        return res.json({success: true,messages});
     } catch (error) {
         console.log(error.message);
-        res.json({success: false, message: error.message});
+        return res.json({success: false, message: error.message});
     }
 }
 
@@ -55,10 +55,10 @@ export const markMessagesAsSeen = async (req,res)=>{
     try {
         const {id} = req.params;
         await Message.findByIdAndUpdate(id, {seen:true});
-        res.json({success:true});
+        return res.json({success:true});
     } catch (error) {
         console.log(error.message);
-        res.json({success: false, message: error.message});
+        return res.json({success: false, message: error.message});
     }
 }
 
@@ -84,10 +84,10 @@ export const sendMessage = async(req,res)=>{
             image: imageUrl,
         });
 
-        res.json({success:true, newMessage});  
+        return res.json({success:true, newMessage});  
 
     } catch (error) {
         console.log(error.message);
-        res.json({success: false, message: error.message});
+        return res.json({success: false, message: error.message});
     }
 }
