@@ -13,6 +13,11 @@ import { Server } from 'socket.io';
 const app = express();
 const server = http.createServer(app)
 
+const allowedOrigins = [
+    "http://localhost:5173",
+    process.env.FRONTEND_URL
+];
+
 //Initialize socket.io server
 export const io = new Server(server,{
     cors: {
@@ -21,6 +26,14 @@ export const io = new Server(server,{
         credentials: true,
     },
 })
+
+app.use(express.json({limit: "4mb"}));
+app.use(
+    cors({
+        origin: allowedOrigins,
+        credentials: true,
+    })
+);
 
 //Store online users
 export const userSocketMap = {}; //{userId: socketId}
@@ -45,16 +58,6 @@ io.on("connection", (socket) => {
     });
 });
 
-
-//Middleware setup
-
-app.use(express.json({limit: "4mb"}));
-app.use(
-    cors({
-        origin: allowedOrigins,
-        credentials: true,
-    })
-);
 
 //Routes Setup
 app.use('/api/status', (req,res)=> res.send('Server is live'));
