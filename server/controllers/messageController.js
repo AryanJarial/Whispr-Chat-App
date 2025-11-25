@@ -28,26 +28,32 @@ export const getUsersForSidebar = async (req,res)=>{
 
 //Get all messages for selected user
 
-export const getMessages = async(req,res) =>{
+export const getMessages = async (req, res) => {
     try {
-        const { id: selectedUserId} = req.params;
+        const { id: selectedUserId } = req.params;
         const myId = req.user._id;
 
         const messages = await Message.find({
-            $or:[
-                {sender: myId, recieverId: selectedUserId},
-                {sender: selectedUserId, recieverId: myId},
+            $or: [
+                { senderId: myId, receieverId: selectedUserId },
+                { senderId: selectedUserId, receieverId: myId },
             ]
-        })
+        }).sort({ createdAt: 1 });
 
-        await Message.updateMany({senderId: selectedUserId, recieverId:myId}, {seen:true});
+        await Message.updateMany(
+            { senderId: selectedUserId, receieverId: myId },
+            { seen: true }
+        );
 
-        return res.json({success: true,messages});
+        return res.json({ success: true, messages });
+
     } catch (error) {
         console.log(error.message);
-        return res.json({success: false, message: error.message});
+        return res.json({ success: false, message: error.message });
     }
-}
+};
+
+
 
 //API to mark message as seen using message id
 
@@ -64,30 +70,32 @@ export const markMessagesAsSeen = async (req,res)=>{
 
 
 //Send message to selected user
-
-export const sendMessage = async(req,res)=>{
+export const sendMessage = async (req, res) => {
     try {
-        const {text, image} = req.body;
+        const { text, image } = req.body;
         const receiverId = req.params.id;
         const senderId = req.user._id;
 
-        let imageUrl;
-
-        if(image){
-            const uploadResponse = await cloudinary.uploader.upload(image);
-            imageUrl = uploadResponse.secure_url;
-        }
         const newMessage = await Message.create({
             senderId,
-            receiverId,
+            receieverId: receiverId,
             text,
-            image: imageUrl,
+            image
         });
 
-        return res.json({success:true, newMessage});  
+        // SEND TO RECEIVER
+        if (userSocketMap[receiverId]) {
+            io.to(receiverId).emit("newMessage", newMessage);
+        }
+
+        // SEND TO SENDER (for sender UI)
+        if (userSocketMap[senderId]) {
+            io.to(senderId).emit("newMessage", newMessage);
+        }
+
+        return res.json({ success: true, newMessage });
 
     } catch (error) {
-        console.log(error.message);
-        return res.json({success: false, message: error.message});
+        return res.json({ success: false, message: error.message });
     }
-}
+};
