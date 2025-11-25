@@ -15,7 +15,11 @@ const server = http.createServer(app)
 
 //Initialize socket.io server
 export const io = new Server(server,{
-    cors: {origin: '*'}
+    cors: {
+        origin: allowedOrigins,
+        methods: ["GET", "POST", "PUT"],
+        credentials: true,
+    },
 })
 
 //Store online users
@@ -45,7 +49,12 @@ io.on("connection", (socket) => {
 //Middleware setup
 
 app.use(express.json({limit: "4mb"}));
-app.use(cors());
+app.use(
+    cors({
+        origin: allowedOrigins,
+        credentials: true,
+    })
+);
 
 //Routes Setup
 app.use('/api/status', (req,res)=> res.send('Server is live'));
